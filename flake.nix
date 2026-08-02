@@ -45,6 +45,20 @@
               python.typer
               python.pytest
             ];
+
+            meta = with pkgs.lib; {
+              description = "";
+              homepage = "https://github.com/fractuscontext/nix-dylibbundler";
+              license = licenses.gpl3Only;
+              mainProgram = "nix-dylibbundler";
+              maintainers = [
+                {
+                  name = "Claire Tam";
+                  email = "claire2026t@posteo.net";
+                }
+              ];
+            };
+
           };
         }
       );

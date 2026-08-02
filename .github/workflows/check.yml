@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2026 Claire Tam <claire2026t@posteo.net>
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
+name: CI Checks & Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  check-and-build:
+    name: Check & Build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necessary for complete git-hooks/linting
+
+      - uses: nixbuild/nix-quick-install-action@v35
+      - uses: Mic92/hestia@v3
+
+      - name: Run Flake Checks (Linters, Formatters, REUSE)
+        run: nix flake check -L
+
+      - name: Build Default Package
+        run: nix build .#default -L
+
+      - name: Smoke Test CLI (Nix build)
+        run: nix run .#default -- --help
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Run Unit Tests
+        run: uv run pytest
